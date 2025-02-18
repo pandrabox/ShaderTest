@@ -37,44 +37,61 @@
             };
             
             sampler2D _MainTex;
-            float _SizeX, _SizeY;
-            float _PosX, _PosY;
+            float4 _MainTex_ST;
             int _ConstraintMode;
-            float _ScreenAspect;
-            
-            // 追加: _MainTex_TexelSizeを手動で計算
-            float2 _MainTex_TexelSize;
+            float4 _MainTex_TexelSize;
 
             v2f vert(appdata v)
             {
                 v2f o;
-                
-                // テクスチャのアスペクト比を計算
-                float aspect = _SizeX / _SizeY;
-                _ScreenAspect = _ScreenParams.x / _ScreenParams.y;
-
-                // モード0: 画面いっぱいにテクスチャを表示（アスペクト比が崩れる）
-                if (_ConstraintMode == 0)
-                {
-                    o.vertex = float4((v.uv.x * 2 * _SizeX - 1) + (_PosX - 0.5) * 2 + (1 - _SizeX),
-                                      (-v.uv.y * 2 * _SizeY + 1) + (_PosY - 0.5) * 2 - (1 - _SizeY),
-                                      0, 1);
-                }
-                // モード1: テクスチャアスペクト比を維持する（xをスクリーンに固定）
-                else if (_ConstraintMode == 1)
-                {
-                    // アスペクト比を保持するために_sizeX と _SizeY を調整
-                    float aspectRatio = _MainTex_TexelSize.x / _MainTex_TexelSize.y;
-                        _SizeY = _ScreenAspect * aspectRatio;
-
-                    o.vertex = float4((v.uv.x * 2 * _SizeX - 1) + (_PosX - 0.5) * 2 + (1 - _SizeX),
-                                      (-v.uv.y * 2 * _SizeY + 1) + (_PosY - 0.5) * 2 - (1 - _SizeY),
-                                      0, 1);
-                }
-
-                // UVは変更せず、そのまま使用
                 o.uv = v.uv;
+                
+                float imgWidth = _MainTex_TexelSize.z; //TexelはPixelの逆数で、x,yは幅・高さの逆数、z,wには幅・高さが入っている
+                float imgHeight = _MainTex_TexelSize.w;
+                float aspectRatio = imgWidth / imgHeight; //アスペクト比とは横/高さのこと。1を超えるなら横長
+                float screenAspect = _ScreenParams.x / _ScreenParams.y; //_ScreenParams.xとはスクリーン（カメラ）のピクセル数
 
+                o.vertex = float4(v.uv.x , v.uv.y, 0, 1);
+                
+                // そのまま表示　この時のサイズは画面1/4
+                if (_ConstraintMode == 0) return o;
+
+                // 反転を修正　サイズそのまま
+                o.vertex = float4(o.vertex.x, -o.vertex.y, 0, 1);
+                if (_ConstraintMode == 1) return o;
+
+                //完全中央に移動　サイズそのまま
+                o.vertex = float4(o.vertex.x - 0.5, o.vertex.y + 0.5, 0, 1);
+                if (_ConstraintMode == 2) return o;
+
+                //画面いっぱいに広げる　サイズは元々1/4なので縦横を２倍
+                o.vertex = float4(o.vertex.x * 2, o.vertex.y * 2, 0, 1);
+                if (_ConstraintMode == 3) return o;
+                
+                // スクリーンのピクセル数で割って1px*1pxにする。その状態だと見えないので画像のピクセル数を掛けて画像サイズそのままにする
+                // これは即ち画像をピクセル数等寸大で表示するということ
+                float xSize,ySize;
+                xSize = imgWidth/_ScreenParams.x;
+                ySize = imgHeight/_ScreenParams.y;
+                o.vertex = float4(o.vertex.x * xSize , o.vertex.y * ySize, 0, 1);
+                if (_ConstraintMode == 4) return o;
+
+                // 2種類の変形をするので一旦保存する
+                float4 originalsize = float4(o.vertex.x , o.vertex.y, 0, 1);
+
+                // 横幅をスクリーンに合うようにする
+                float size;
+                size = 1/xSize;
+                o.vertex = float4(originalsize.x * size , originalsize.y * size, 0, 1);
+                if (_ConstraintMode == 5) return o;
+
+                
+                // 縦幅をスクリーンに合うようにする
+                size = 1/ySize/20;
+                o.vertex = float4(originalsize.x * size , originalsize.y * size, 0, 1);
+                if (_ConstraintMode == 6) return o;
+
+                
                 return o;
             }
             

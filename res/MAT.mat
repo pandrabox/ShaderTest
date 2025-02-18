@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MAT
-  m_Shader: {fileID: 4800000, guid: 42d522d7d66bcc84291832690d849bb6, type: 3}
+  m_Shader: {fileID: 4800000, guid: cea8ed637c146564ba2986b88e392331, type: 3}
   m_ShaderKeywords: _ALPHATEST_ON _ENABLEDESKTOP_ON _ENABLEOTHER_ON _ENABLESS_ON
     _ENABLEVR_ON
   m_LightmapFlags: 4
@@ -41,7 +41,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 1c80916cf50b5524093b46cb76120434, type: 3}
+        m_Texture: {fileID: 2800000, guid: 772d4adec5d01b94594c325d7c58fbac, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -60,7 +60,7 @@ Material:
     - _AlphaToMask: 1
     - _BlendMode: 1
     - _BumpScale: 1
-    - _ConstraintMode: 1
+    - _ConstraintMode: 6
     - _Cutoff: 0
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
